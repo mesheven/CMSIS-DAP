@@ -257,6 +257,9 @@ __task void serial_process() {
 }
 
 extern __task void hid_process(void);
+
+void uart_gpio_update(void);
+
 __task void main_task(void) {
     // State processing
     uint16_t flags;
@@ -277,7 +280,8 @@ __task void main_task(void) {
 
     // string containing unique ID
     uint8_t * id_str;
-
+		unsigned long n, m;
+	
     // Initialize our serial mailbox
     os_mbx_init(&serial_mailbox, sizeof(serial_mailbox));
 
@@ -290,6 +294,7 @@ __task void main_task(void) {
     gpio_set_dap_led(1);
     gpio_set_cdc_led(1);
     gpio_set_msd_led(1);
+		
 
 #ifdef BOARD_UBLOX_C027
     PORT_SWD_SETUP();
@@ -332,6 +337,14 @@ __task void main_task(void) {
     // start semihost task
     semihost_init();
     semihost_enable();
+
+		for (n = 0; n < 4; n++)
+		{
+				gpio_set_cdc_led(0);
+				os_dly_wait(25);
+				gpio_set_cdc_led(1);
+				os_dly_wait(25);
+		}
 
     while(1) {
         os_evt_wait_or(   FLAGS_MAIN_RESET              // Put target in reset state
@@ -411,6 +424,9 @@ __task void main_task(void) {
         }
 
         if (flags & FLAGS_MAIN_90MS) {
+						//update the UART GPIOs
+					  uart_gpio_update();						
+					
             if (!button_activated) {
                 gpio_enable_button_flag(main_task_id, FLAGS_MAIN_RESET);
                 button_activated = 1;

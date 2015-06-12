@@ -341,10 +341,13 @@ __task void main_task(void) {
 		for (n = 0; n < 4; n++)
 		{
 				gpio_set_cdc_led(0);
-				os_dly_wait(25);
+				gpio_set_msd_led(1);
+				os_dly_wait(10);
 				gpio_set_cdc_led(1);
-				os_dly_wait(25);
+				gpio_set_msd_led(0);
+				os_dly_wait(10);
 		}
+		gpio_set_msd_led(1);
 
     while(1) {
         os_evt_wait_or(   FLAGS_MAIN_RESET              // Put target in reset state
